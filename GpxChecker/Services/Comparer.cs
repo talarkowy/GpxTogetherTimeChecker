@@ -5,20 +5,6 @@ namespace GpxChecker.Services;
 
 internal class Comparer
 {
-    private DateTime Start(
-        List<TrackPoint> resA,
-        List<TrackPoint> resB) =>
-        new[] { resA.First().Time, resB.First().Time }.Max();
-
-    private DateTime End(
-        List<TrackPoint> resA,
-        List<TrackPoint> resB) =>
-        new[] { resA.Last().Time, resB.Last().Time }.Min();
-
-    private Dictionary<DateTime, TrackPoint> Dict(
-        List<TrackPoint> points) =>
-        points.ToDictionary(p => p.Time, p => p);
-
     public (TimeSpan TogetherTime, TimeSpan TotalTime, double Percent) ComputeTogetherTime(
         List<TrackPoint> resA,
         List<TrackPoint> resB,
@@ -64,8 +50,8 @@ internal class Comparer
             : 0.0;
 
         return (TimeSpan.FromSeconds(togetherSeconds),
-                TimeSpan.FromSeconds(totalSeconds),
-                percents);
+            TimeSpan.FromSeconds(totalSeconds),
+            percents);
     }
 
     public List<Interval> ComputerTogetherInterval(
@@ -128,6 +114,7 @@ internal class Comparer
 
                 prevMid = new TrackPoint(midLat, midLon, t);
                 points.Add(prevMid);
+
             }
             else if (inInterval)
             {
@@ -168,4 +155,18 @@ internal class Comparer
 
         return intervals;
     }
+
+    private DateTime Start(
+        List<TrackPoint> resA,
+        List<TrackPoint> resB) =>
+            new[] { resA.First().Time, resB.First().Time }.Max();
+
+    private DateTime End(
+        List<TrackPoint> resA,
+        List<TrackPoint> resB) =>
+            new[] { resA.Last().Time, resB.Last().Time }.Min();
+
+    private Dictionary<DateTime, TrackPoint> Dict(
+        List<TrackPoint> points) =>
+            points.ToDictionary(p => p.Time, p => p);
 }

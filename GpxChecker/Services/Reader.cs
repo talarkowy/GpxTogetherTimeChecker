@@ -7,6 +7,11 @@ namespace GpxChecker.Services;
 internal class Reader
 {
     private const string GPX_NAMESPACE = "http://www.topografix.com/GPX/1/1";
+    private const string TRKPT = "trkpt";
+    private const string LAT = "lat";
+    private const string LON = "lon";
+    private const string ELE = "ele";
+    private const string TIME = "time";
 
     public Track Execute(string path)
     {
@@ -14,31 +19,29 @@ internal class Reader
         var doc = XDocument.Load(path);
         var track = new Track();
 
-        var trkpts = doc.Descendants(ns + "trkpt");
+        var elements = doc.Descendants(ns + TRKPT);
 
-        foreach (var pt in trkpts)
+        foreach (var element in elements.Where(_ => _ is not null))
         {
-            if (pt is not null)
+            var lat = double.Parse(element!.Attribute(LAT)?.Value!, CultureInfo.InvariantCulture);
+            var lon = double.Parse(element!.Attribute(LON)?.Value!, CultureInfo.InvariantCulture);
+
+            double? ele = null;
+            var eleElement = element.Element(ns + ELE);
+
+            if (eleElement is not null)
             {
-                var lat = double.Parse(pt!.Attribute("lat")?.Value!, CultureInfo.InvariantCulture);
-                var lon = double.Parse(pt!.Attribute("lon")?.Value!, CultureInfo.InvariantCulture);
-                double? ele = null;
-                var eleEl = pt.Element(ns + "ele");
-
-                if (eleEl is not null)
-                {
-                    ele = double.Parse(eleEl.Value, CultureInfo.InvariantCulture);
-                }
-
-                var timeEl = pt.Element(ns + "time");
-                if (timeEl is null)
-                {
-                    continue;
-                }
-
-                var time = DateTime.Parse(timeEl.Value, null, DateTimeStyles.RoundtripKind);
-                track.Add(new TrackPoint(lat, lon, time, ele));
+                ele = double.Parse(eleElement.Value, CultureInfo.InvariantCulture);
             }
+
+            var eleTime = element.Element(ns + TIME);
+            if (eleTime is null)
+            {
+                continue;
+            }
+
+            var time = DateTime.Parse(eleTime.Value, null, DateTimeStyles.RoundtripKind);
+            track.Add(new TrackPoint(lat, lon, time, ele));            
         }
 
         track.Sort();

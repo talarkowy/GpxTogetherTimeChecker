@@ -13,12 +13,18 @@ namespace GpxChecker.Helpers
 
             var t0 = track.Points.First().Time;
             var t1 = track.Points.Last().Time;
+            int count = (int)((t1 - t0).TotalSeconds / resolutionSeconds) + 1;
 
-            return Enumerable
-                .Range(0, (int)((t1 - t0).TotalSeconds / resolutionSeconds) + 1)
-                .Select(_ => InterpolatedPositionAt(track.Points, t0.AddSeconds(_ * resolutionSeconds)))
+            var results = new TrackPoint?[count];
+
+            Parallel.For(0, count, new() { MaxDegreeOfParallelism = 16 }, i =>
+            {
+                results[i] = InterpolatedPositionAt(track.Points, t0.AddSeconds(i * resolutionSeconds));
+            });
+
+            return [.. results
                 .Where(_ => _ is not null)
-                .ToList()!;
+                .Select(_ => _!)];
         }
 
         private static TrackPoint? InterpolatedPositionAt(List<TrackPoint> points, DateTime target)
@@ -33,8 +39,7 @@ namespace GpxChecker.Helpers
                 return new TrackPoint(points.Last().Lat, points.Last().Lon, target, points.Last().Ele);
             }
 
-            var i = points
-                .FindLastIndex(p => p.Time <= target);
+            var i = points.FindLastIndex(p => p.Time <= target);
 
             if (i < 0 || i >= points.Count - 1)
             {
