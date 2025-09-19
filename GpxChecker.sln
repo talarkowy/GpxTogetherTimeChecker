@@ -3,7 +3,7 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.14.36408.4
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GpxChecker", "GpxChecker\GpxChecker.csproj", "{9DABDD10-02EF-4454-83E3-897EA0BE31DA}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GpxChecker", "src\GpxChecker\GpxChecker.csproj", "{9DABDD10-02EF-4454-83E3-897EA0BE31DA}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

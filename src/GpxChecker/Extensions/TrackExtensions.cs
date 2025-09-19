@@ -1,6 +1,6 @@
 ﻿using GpxChecker.Models;
 
-namespace GpxChecker.Helpers
+namespace GpxChecker.Extensions
 {
     internal static class TrackExtensions
     {

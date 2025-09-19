@@ -1,4 +1,4 @@
-﻿using GpxChecker.Helpers;
+﻿using GpxChecker.Extensions;
 using GpxChecker.Models;
 using GpxChecker.Services;
 using Microsoft.Extensions.DependencyInjection;
@@ -27,10 +27,10 @@ internal class Program
             .GetRequiredService<Reader>();
 
         var trackA = reader
-             .Execute(@"f:\Download\007-xxx.gpx");
+             .Execute(@"f:\Download\007.gpx");
 
         var trackB = reader
-            .Execute(@"f:\Download\029-xxx.gpx");
+            .Execute(@"f:\Download\029.gpx");
 
         var resA = TrackExtensions
             .ResampleByTime(trackA, RESOLUTION_SECONDS);
