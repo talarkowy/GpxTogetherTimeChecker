@@ -27,10 +27,10 @@ internal class Program
             .GetRequiredService<Reader>();
 
         var trackA = reader
-             .Execute(@"f:\Download\007-Damian_Myśliwy.gpx");
+             .Execute(@"f:\Download\007-xxx.gpx");
 
         var trackB = reader
-            .Execute(@"f:\Download\029-Robert_Trawiński.gpx");
+            .Execute(@"f:\Download\029-xxx.gpx");
 
         var resA = TrackExtensions
             .ResampleByTime(trackA, RESOLUTION_SECONDS);
