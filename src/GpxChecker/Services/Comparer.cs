@@ -45,26 +45,23 @@ internal class Comparer
         }
 
         var totalSeconds = (end - start).TotalSeconds + 1;
-        var percents = totalSeconds > 0
-            ? togetherSeconds * 100.0 / totalSeconds
-            : 0.0;
+        var percents = togetherSeconds * 100.0 / totalSeconds;
 
         return (TimeSpan.FromSeconds(togetherSeconds),
             TimeSpan.FromSeconds(totalSeconds),
             percents);
     }
 
-    public List<Interval> ComputerTogetherInterval(
+    public List<Interval> ComputeTogetherInterval(
         List<TrackPoint> resA,
         List<TrackPoint> resB,
         double distanceThresholdMeters,
         int minDurationSeconds)
     {
-        var intervals = new List<Interval>();
 
         if (resA.Count == 0 || resB.Count == 0)
         {
-            return intervals;
+            return [];
         }
 
         var start = Start(resA, resB);
@@ -72,7 +69,7 @@ internal class Comparer
 
         if (start > end)
         {
-            return intervals;
+            return [];
         }
 
         var dictA = Dict(resA);
@@ -84,6 +81,7 @@ internal class Comparer
 
         TrackPoint? prevMid = null;
         var points = new List<TrackPoint>();
+        var intervals = new List<Interval>();
 
         for (var t = start; t <= end; t = t.AddSeconds(1))
         {
@@ -156,17 +154,17 @@ internal class Comparer
         return intervals;
     }
 
-    private DateTime Start(
+    private static DateTime Start(
         List<TrackPoint> resA,
         List<TrackPoint> resB) =>
             new[] { resA.First().Time, resB.First().Time }.Max();
 
-    private DateTime End(
+    private static DateTime End(
         List<TrackPoint> resA,
         List<TrackPoint> resB) =>
             new[] { resA.Last().Time, resB.Last().Time }.Min();
 
-    private Dictionary<DateTime, TrackPoint> Dict(
+    private static Dictionary<DateTime, TrackPoint> Dict(
         List<TrackPoint> points) =>
             points.ToDictionary(p => p.Time, p => p);
 }
