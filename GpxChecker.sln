@@ -1,0 +1,25 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.14.36408.4
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GpxChecker", "GpxChecker\GpxChecker.csproj", "{9DABDD10-02EF-4454-83E3-897EA0BE31DA}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{9DABDD10-02EF-4454-83E3-897EA0BE31DA}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{9DABDD10-02EF-4454-83E3-897EA0BE31DA}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{9DABDD10-02EF-4454-83E3-897EA0BE31DA}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{9DABDD10-02EF-4454-83E3-897EA0BE31DA}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {92B91DBE-2CE5-466A-9A02-BA4F1D7E65F4}
+	EndGlobalSection
+EndGlobal
