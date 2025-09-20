@@ -1,4 +1,4 @@
-﻿namespace GpxChecker.Models;
+﻿namespace GpxTogetherTimeChecker.Models;
 
 internal class Track
 {

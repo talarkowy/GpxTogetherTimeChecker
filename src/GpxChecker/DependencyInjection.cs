@@ -1,7 +1,7 @@
-﻿using GpxChecker.Services;
+﻿using GpxTogetherTimeChecker.Services;
 using Microsoft.Extensions.DependencyInjection;
 
-namespace GpxChecker;
+namespace GpxTogetherTimeChecker;
 
 internal static class DependencyInjection
 {

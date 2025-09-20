@@ -1,4 +1,4 @@
-﻿namespace GpxChecker;
+﻿namespace GpxTogetherTimeChecker.Options;
 
 internal class Options
 {

@@ -1,8 +1,8 @@
-﻿using GpxChecker.Models;
+﻿using GpxTogetherTimeChecker.Models;
 using System.Globalization;
 using System.Xml.Linq;
 
-namespace GpxChecker.Services;
+namespace GpxTogetherTimeChecker.Services;
 
 internal class Writer
 {

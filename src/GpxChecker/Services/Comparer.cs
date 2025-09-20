@@ -1,7 +1,7 @@
-﻿using GpxChecker.Helpers;
-using GpxChecker.Models;
+﻿using GpxTogetherTimeChecker.Helpers;
+using GpxTogetherTimeChecker.Models;
 
-namespace GpxChecker.Services;
+namespace GpxTogetherTimeChecker.Services;
 
 internal class Comparer
 {

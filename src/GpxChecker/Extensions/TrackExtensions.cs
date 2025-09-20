@@ -1,6 +1,6 @@
-﻿using GpxChecker.Models;
+﻿using GpxTogetherTimeChecker.Models;
 
-namespace GpxChecker.Extensions
+namespace GpxTogetherTimeChecker.Extensions
 {
     internal static class TrackExtensions
     {

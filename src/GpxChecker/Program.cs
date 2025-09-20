@@ -1,10 +1,10 @@
-﻿using GpxChecker.Extensions;
-using GpxChecker.Models;
-using GpxChecker.Services;
+﻿using GpxTogetherTimeChecker.Extensions;
+using GpxTogetherTimeChecker.Models;
+using GpxTogetherTimeChecker.Services;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 
-namespace GpxChecker;
+namespace GpxTogetherTimeChecker;
 
 internal class Program
 {
@@ -46,15 +46,14 @@ internal class Program
 
         var options = configuration
             .GetSection(nameof(Options))
-            .Get<Options>()
+            .Get<Options.Options>()
             ?? throw new InvalidOperationException("Cannot read options from configuration");
-
 
         List<List<TrackPoint>> tracks = [.. filePaths
                 .Take(2)
                 .Select(reader.Execute)
                 .Select(readedTrack =>
-                    TrackExtensions.ResampleByTime(readedTrack, options.ResolutionInSeconds))];
+                    readedTrack.ResampleByTime(options.ResolutionInSeconds))];
 
         var track1 = tracks[0];
         var track2 = tracks[1];
@@ -65,7 +64,7 @@ internal class Program
 
     private static void ComputeTogetherTime(
         Comparer comparer,
-        Options options,
+        Options.Options options,
         List<TrackPoint> resA,
         List<TrackPoint> resB)
     {
@@ -83,7 +82,7 @@ internal class Program
     private static void ComputeTogetherIntervals(
         Comparer comparer, 
         Writer writer,
-        Options options,
+        Options.Options options,
         List<TrackPoint> resA,
         List<TrackPoint> resB)
     {

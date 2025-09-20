@@ -1,4 +1,4 @@
-﻿namespace GpxChecker.Helpers
+﻿namespace GpxTogetherTimeChecker.Helpers
 {
     internal static class DistanceHelper
     {
