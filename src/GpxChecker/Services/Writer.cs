@@ -70,5 +70,5 @@ internal class Writer
         $"Together {interval.Start:yyyyMMdd_HHmmss}";
 
     private string FilePath(double distanceThresholdMeters, int minDurationSeconds, int index) =>
-        $"f:\\tmp\\{minDurationSeconds}\\{distanceThresholdMeters}\\{index:D2}.gpx";
+        $"D:\\download\\gpx\\{minDurationSeconds}\\{distanceThresholdMeters}\\{index:D2}.gpx";
 }

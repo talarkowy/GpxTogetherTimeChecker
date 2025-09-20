@@ -1,67 +1,80 @@
 ﻿using GpxChecker.Extensions;
 using GpxChecker.Models;
 using GpxChecker.Services;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace GpxChecker;
 
 internal class Program
 {
-    private const int RESOLUTION_SECONDS = 1;
-
-    private static readonly List<int> INTERVALS = [60, 180, 300, 600, 1200, 3600];
-    private static readonly List<double> DISTANCES = [5.0, 10.0, 50.0, 100.0, 200.0, 500.0];
-
-    private static readonly Dictionary<double, List<int>> INTERVALS_VS_DISTANCES = CreateDict();
-    private static Dictionary<double, List<int>> CreateDict() => DISTANCES
-        .ToDictionary(distance => distance, distance => INTERVALS);
-
-    internal static void Main()
+    internal static void Main(string[] args)
     {
-        var serviceProvider = DependencyInjection
-            .ConfigureServices();
+        if (args.Length != 2)
+        {
+            Console.WriteLine("Give file paths as arguments");
+        }
 
-        var scope = serviceProvider.CreateScope();
+        var filePaths = args.Length > 0
+            ? args.ToList()
+            : [@"f:\Download\file1.gpx", @"f:\Download\file2.gpx"];
+
+        var serviceProvider = DependencyInjection
+            .ConfigureServices()
+            ?? throw new InvalidOperationException("Cannot configure services");
+
+        var configuration = new ConfigurationBuilder()
+            .AddJsonFile("appsettings.json", optional: false, reloadOnChange: true)
+            .Build() 
+            ?? throw new InvalidOperationException("Cannot build configuration");
+
+        var scope = serviceProvider
+            .CreateScope()
+            ?? throw new InvalidOperationException("Cannot create scope");
 
         var reader = scope.ServiceProvider
-            .GetRequiredService<Reader>();
-        
+            .GetRequiredService<Reader>()
+            ?? throw new InvalidOperationException("Cannot get reader");
+
         var comparer = scope.ServiceProvider
-            .GetRequiredService<Comparer>();
+            .GetRequiredService<Comparer>()
+            ?? throw new InvalidOperationException("Cannot get comparer");
 
         var writer = scope.ServiceProvider
-            .GetRequiredService<Writer>();
+            .GetRequiredService<Writer>()
+            ?? throw new InvalidOperationException("Cannot get writer");
 
-        var filesPath = new List<string> { @"f:\Download\007.gpx", @"f:\Download\029.gpx" };
+        var options = configuration
+            .GetSection(nameof(Options))
+            .Get<Options>()
+            ?? throw new InvalidOperationException("Cannot read options from configuration");
 
-        List<List<TrackPoint>> tracks = [.. filesPath
+
+        List<List<TrackPoint>> tracks = [.. filePaths
                 .Take(2)
                 .Select(reader.Execute)
                 .Select(readedTrack =>
-                    TrackExtensions.ResampleByTime(readedTrack, RESOLUTION_SECONDS))];
+                    TrackExtensions.ResampleByTime(readedTrack, options.ResolutionInSeconds))];
 
         var track1 = tracks[0];
         var track2 = tracks[1];
 
-        ComputeTogetherTime(comparer, track1, track2);
-        ComputeTogetherIntervals(comparer, writer, track1, track2);
-
-        //Console.WriteLine($"Track A: {trackA.Points.Count} pts, resampled: {track1.Count} pts");
-        //Console.WriteLine($"Track B: {trackB.Points.Count} pts, resampled: {track2.Count} pts");
-        Console.WriteLine();
+        ComputeTogetherTime(comparer, options, track1, track2);
+        ComputeTogetherIntervals(comparer, writer, options, track1, track2);
     }
 
     private static void ComputeTogetherTime(
         Comparer comparer,
+        Options options,
         List<TrackPoint> resA,
         List<TrackPoint> resB)
     {
-        foreach (var distance in DISTANCES)
+        foreach (var distance in options.Distances)
         {
             var (TogetherTime, TotalTime, Percent) = comparer.
                 ComputeTogetherTime(resA, resB, distance);
 
-            Console.WriteLine($"Distance {distance}m: " +
+            Console.WriteLine($"Distance < {distance}m: " +
                 $"Together: {TogetherTime} out of {TotalTime} " +
                 $"= {Percent:F1}% of ride");
         }
@@ -70,10 +83,11 @@ internal class Program
     private static void ComputeTogetherIntervals(
         Comparer comparer, 
         Writer writer,
+        Options options,
         List<TrackPoint> resA,
         List<TrackPoint> resB)
     {
-        foreach (var keyValuePair in INTERVALS_VS_DISTANCES)
+        foreach (var keyValuePair in options.IntervalsVsDistances)
         {
             var distanceThresholdMeters = keyValuePair.Key;
 
