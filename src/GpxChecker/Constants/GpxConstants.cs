@@ -16,4 +16,5 @@ internal static class GpxConstants
     public const string Lon = "lon";
     public const string Ele = "ele";
     public const string Time = "time";
+    public const string TimeFormat = "o";
 }

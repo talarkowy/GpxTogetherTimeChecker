@@ -49,7 +49,7 @@ internal class GpxWriter : IGpxWriter
                             new XElement(ns + GpxConstants.Trkpt,
                                 new XAttribute(GpxConstants.Lat, p.Lat.ToString(CultureInfo.InvariantCulture)),
                                 new XAttribute(GpxConstants.Lon, p.Lon.ToString(CultureInfo.InvariantCulture)),
-                                new XElement(ns + GpxConstants.Time, p.Time.ToString("o")),
+                                new XElement(ns + GpxConstants.Time, p.Time.ToString(GpxConstants.TimeFormat)),
                                 p.Ele.HasValue
                                     ? new XElement(ns + GpxConstants.Ele, p.Ele.Value.ToString(CultureInfo.InvariantCulture))
                                     : null

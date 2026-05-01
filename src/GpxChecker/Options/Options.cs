@@ -10,5 +10,5 @@ internal class Options
     private Dictionary<double, List<int>>? _intervalsVsDistances;
 
     public Dictionary<double, List<int>> IntervalsVsDistances =>
-        _intervalsVsDistances ??= Distances.ToDictionary(d => d, _ => Intervals);
+        _intervalsVsDistances ??= Distances.ToDictionary(d => d, _ => new List<int>(Intervals));
 }
