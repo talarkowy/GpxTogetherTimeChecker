@@ -1,31 +1,22 @@
-﻿using GpxTogetherTimeChecker.Helpers;
+using GpxTogetherTimeChecker.Helpers;
 using GpxTogetherTimeChecker.Models;
 
 namespace GpxTogetherTimeChecker.Services;
 
-internal class Comparer
+internal class TrackComparer : ITrackComparer
 {
     public (TimeSpan TogetherTime, TimeSpan TotalTime, double Percent) ComputeTogetherTime(
         List<TrackPoint> resA,
         List<TrackPoint> resB,
         double distanceThresholdMeters)
     {
-        if (resA.Count == 0 || resB.Count == 0)
+        var comparison = PrepareComparison(resA, resB);
+        if (comparison is null)
         {
             return (TimeSpan.Zero, TimeSpan.Zero, 0);
         }
 
-        var start = Start(resA, resB);
-        var end = End(resA, resB);
-
-        if (start > end)
-        {
-            return (TimeSpan.Zero, TimeSpan.Zero, 0);
-        }
-
-        var dictA = Dict(resA);
-        var dictB = Dict(resB);
-
+        var (start, end, dictA, dictB) = comparison.Value;
         var togetherSeconds = 0;
 
         for (var t = start; t <= end; t = t.AddSeconds(1))
@@ -35,9 +26,7 @@ internal class Comparer
                 continue;
             }
 
-            var distance = DistanceHelper
-                .DistanceBetweenTwoPointsInMeters(a.Lat, a.Lon, b.Lat, b.Lon);
-
+            var distance = DistanceHelper.DistanceBetweenTwoPointsInMeters(a.Lat, a.Lon, b.Lat, b.Lon);
             if (distance < distanceThresholdMeters)
             {
                 togetherSeconds++;
@@ -45,11 +34,9 @@ internal class Comparer
         }
 
         var totalSeconds = (end - start).TotalSeconds + 1;
-        var percents = togetherSeconds * 100.0 / totalSeconds;
+        var percent = togetherSeconds * 100.0 / totalSeconds;
 
-        return (TimeSpan.FromSeconds(togetherSeconds),
-            TimeSpan.FromSeconds(totalSeconds),
-            percents);
+        return (TimeSpan.FromSeconds(togetherSeconds), TimeSpan.FromSeconds(totalSeconds), percent);
     }
 
     public List<Interval> ComputeTogetherInterval(
@@ -58,27 +45,17 @@ internal class Comparer
         double distanceThresholdMeters,
         int minDurationSeconds)
     {
-
-        if (resA.Count == 0 || resB.Count == 0)
+        var comparison = PrepareComparison(resA, resB);
+        if (comparison is null)
         {
             return [];
         }
 
-        var start = Start(resA, resB);
-        var end = End(resA, resB);
-
-        if (start > end)
-        {
-            return [];
-        }
-
-        var dictA = Dict(resA);
-        var dictB = Dict(resB);
+        var (start, end, dictA, dictB) = comparison.Value;
 
         var inInterval = false;
         var intervalStart = DateTime.MinValue;
         double distanceSum = 0;
-
         TrackPoint? prevMid = null;
         var points = new List<TrackPoint>();
         var intervals = new List<Interval>();
@@ -89,6 +66,7 @@ internal class Comparer
             {
                 continue;
             }
+
             var distance = DistanceHelper.DistanceBetweenTwoPointsInMeters(a.Lat, a.Lon, b.Lat, b.Lon);
 
             if (distance < distanceThresholdMeters)
@@ -112,22 +90,12 @@ internal class Comparer
 
                 prevMid = new TrackPoint(midLat, midLon, t);
                 points.Add(prevMid);
-
             }
             else if (inInterval)
             {
-                var intervalEnd = t.AddSeconds(-1);
-                var duration = (int)(intervalEnd - intervalStart).TotalSeconds + 1;
-
-                if (duration >= minDurationSeconds)
+                if (TryCreateInterval(intervalStart, t.AddSeconds(-1), distanceSum, points, minDurationSeconds) is { } interval)
                 {
-                    intervals.Add(new Interval(
-                        intervalStart,
-                        intervalEnd,
-                        duration,
-                        distanceSum,
-                        [.. points]
-                    ));
+                    intervals.Add(interval);
                 }
 
                 inInterval = false;
@@ -136,35 +104,48 @@ internal class Comparer
 
         if (inInterval)
         {
-            var intervalEnd = end;
-            var duration = (int)(intervalEnd - intervalStart).TotalSeconds + 1;
-
-            if (duration >= minDurationSeconds)
+            if (TryCreateInterval(intervalStart, end, distanceSum, points, minDurationSeconds) is { } interval)
             {
-                intervals.Add(new Interval(
-                    intervalStart,
-                    intervalEnd,
-                    duration,
-                    distanceSum,
-                    [.. points]
-                ));
+                intervals.Add(interval);
             }
         }
 
         return intervals;
     }
 
-    private static DateTime Start(
-        List<TrackPoint> resA,
-        List<TrackPoint> resB) =>
-            new[] { resA.First().Time, resB.First().Time }.Max();
+    private static (DateTime Start, DateTime End, Dictionary<DateTime, TrackPoint> DictA, Dictionary<DateTime, TrackPoint> DictB)?
+        PrepareComparison(List<TrackPoint> resA, List<TrackPoint> resB)
+    {
+        if (resA.Count == 0 || resB.Count == 0)
+        {
+            return null;
+        }
 
-    private static DateTime End(
-        List<TrackPoint> resA,
-        List<TrackPoint> resB) =>
-            new[] { resA.Last().Time, resB.Last().Time }.Min();
+        var start = new[] { resA[0].Time, resB[0].Time }.Max();
+        var end = new[] { resA[^1].Time, resB[^1].Time }.Min();
 
-    private static Dictionary<DateTime, TrackPoint> Dict(
-        List<TrackPoint> points) =>
-            points.ToDictionary(p => p.Time, p => p);
+        if (start > end)
+        {
+            return null;
+        }
+
+        return (start, end, resA.ToDictionary(p => p.Time), resB.ToDictionary(p => p.Time));
+    }
+
+    private static Interval? TryCreateInterval(
+        DateTime intervalStart,
+        DateTime intervalEnd,
+        double distanceSum,
+        List<TrackPoint> points,
+        int minDurationSeconds)
+    {
+        var duration = (int)(intervalEnd - intervalStart).TotalSeconds + 1;
+
+        if (duration < minDurationSeconds)
+        {
+            return null;
+        }
+
+        return new Interval(intervalStart, intervalEnd, duration, distanceSum, [.. points]);
+    }
 }
